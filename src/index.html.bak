@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EcoWatch — Pollution Response Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inconsolata:wght@400;500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:       #090d0a;
+  --surface:  #0f1610;
+  --s2:       #141d15;
+  --s3:       #1a2419;
+  --border:   #1e2d1f;
+  --border2:  #263528;
+  --green:    #41c46e;
+  --green2:   #2d8f4e;
+  --green-dim:#1b5430;
+  --red:      #e05252;
+  --red-dim:  #6b1f1f;
+  --amber:    #d4902a;
+  --amber-dim:#5a3a0a;
+  --blue:     #4a9ebb;
+  --text:     #c8deca;
+  --text2:    #8aaa8e;
+  --text3:    #4d6b51;
+  --mono:     'Inconsolata',monospace;
+  --head:     'Rajdhani',sans-serif;
+  --body:     'Lato',sans-serif;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14px;line-height:1.5}
+
+/* ── scrollbar ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── LOGIN ────────────────────────────────────────────────────────────────── */
+#view-login{
+  display:flex;align-items:center;justify-content:center;
+  height:100vh;
+  background:radial-gradient(ellipse at 30% 60%,#0d2012 0%,var(--bg) 65%);
+}
+.login-box{
+  width:360px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:4px;
+  padding:2.5rem;
+  box-shadow:0 0 60px rgba(0,0,0,.6),0 0 0 1px rgba(65,196,110,.04);
+  animation:fadeUp .4s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.login-brand{
+  text-align:center;margin-bottom:2rem;
+}
+.login-brand .eco-icon{font-size:2.2rem;margin-bottom:.5rem;display:block}
+.login-brand h1{
+  font-family:var(--head);font-size:1.6rem;font-weight:700;
+  letter-spacing:.06em;color:var(--green);
+}
+.login-brand p{font-size:.75rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-top:.2rem}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:.4rem}
+.field input{
+  width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:3px;
+  padding:.55rem .75rem;color:var(--text);font-family:var(--mono);font-size:.9rem;outline:none;
+  transition:border-color .15s;
+}
+.field input:focus{border-color:var(--green2)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  padding:.55rem 1.1rem;border-radius:3px;border:none;cursor:pointer;
+  font-family:var(--head);font-size:.9rem;font-weight:600;letter-spacing:.05em;
+  transition:all .15s;
+}
+.btn-primary{background:var(--green2);color:#fff}
+.btn-primary:hover{background:var(--green);box-shadow:0 0 14px rgba(65,196,110,.3)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(224,82,82,.3)}
+.btn-danger:hover{background:rgba(224,82,82,.2);box-shadow:0 0 10px rgba(224,82,82,.2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--green2);color:var(--green)}
+.btn-safe{background:rgba(65,196,110,.12);color:var(--green);border:1px solid rgba(65,196,110,.3)}
+.btn-safe:hover{background:rgba(65,196,110,.2)}
+.btn-full{width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.login-hint{margin-top:1.5rem;padding:1rem;background:var(--s3);border-radius:3px;border-left:2px solid var(--green-dim)}
+.login-hint p{font-size:.75rem;color:var(--text3);line-height:1.7;font-family:var(--mono)}
+.login-hint strong{color:var(--text2)}
+#login-error{display:none;margin-top:.75rem;padding:.5rem .75rem;background:var(--red-dim);border:1px solid rgba(224,82,82,.3);border-radius:3px;font-size:.8rem;color:var(--red)}
+
+/* ── DASHBOARD SHELL ──────────────────────────────────────────────────────── */
+#view-dashboard{display:none;height:100vh;flex-direction:column}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 1.25rem;height:48px;min-height:48px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.topbar-brand{display:flex;align-items:center;gap:.6rem}
+.topbar-brand .eco{font-size:1.1rem}
+.topbar-brand h1{font-family:var(--head);font-size:1.1rem;font-weight:700;letter-spacing:.08em;color:var(--green)}
+.topbar-brand span{font-size:.65rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-left:.2rem}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.user-badge{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.25rem .75rem;background:var(--s2);border:1px solid var(--border);border-radius:20px;
+  font-size:.78rem;
+}
+.user-badge .uname{color:var(--text);font-weight:700}
+.role-pill{
+  font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;
+  padding:.12em .5em;border-radius:2px;font-family:var(--head);
+}
+.role-admin    {background:rgba(74,158,187,.2);color:var(--blue);border:1px solid rgba(74,158,187,.3)}
+.role-field_agent{background:rgba(65,196,110,.15);color:var(--green);border:1px solid rgba(65,196,110,.3)}
+.role-volunteer{background:rgba(212,144,42,.15);color:var(--amber);border:1px solid rgba(212,144,42,.3)}
+
+/* pollution alert banner */
+#proto-banner{
+  display:none;align-items:center;gap:.75rem;
+  padding:.4rem 1.25rem;background:rgba(224,82,82,.12);border-bottom:1px solid rgba(224,82,82,.35);
+  font-size:.78rem;color:var(--red);flex-shrink:0;
+  animation:pulse 2s ease infinite;
+}
+@keyframes pulse{0%,100%{background:rgba(224,82,82,.12)}50%{background:rgba(224,82,82,.2)}}
+#proto-banner .banner-icon{font-size:1rem}
+#proto-banner strong{color:#ff8080}
+
+/* ── LAYOUT ── */
+.workspace{display:flex;flex:1;overflow:hidden}
+.sidebar{
+  width:180px;min-width:180px;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  padding:.75rem 0;overflow-y:auto;flex-shrink:0;
+}
+.nav-section{padding:.5rem .75rem .25rem;font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);font-family:var(--head)}
+.nav-item{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.5rem 1rem;cursor:pointer;font-size:.82rem;color:var(--text2);
+  border-left:2px solid transparent;transition:all .12s;position:relative;
+}
+.nav-item:hover{background:var(--s2);color:var(--text)}
+.nav-item.active{background:var(--s2);color:var(--green);border-left-color:var(--green)}
+.nav-item .nav-icon{font-size:1rem;width:18px;text-align:center}
+.nav-item.locked{color:var(--text3)}
+.nav-item.locked:hover{color:var(--text3);background:transparent;cursor:not-allowed}
+.nav-item .lock-icon{font-size:.7rem;position:absolute;right:.75rem;top:50%;transform:translateY(-50%)}
+.nav-item.exploited{color:var(--red) !important;border-left-color:var(--red) !important}
+.nav-item.exploited .lock-icon{color:var(--red)}
+
+.content{flex:1;overflow-y:auto;padding:1.5rem}
+
+/* ── PANELS ── */
+.tab-panel{display:none;animation:fadeIn .2s ease}
+.tab-panel.active{display:block}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.panel-header{
+  display:flex;align-items:baseline;gap:.75rem;margin-bottom:1.25rem;
+  padding-bottom:.75rem;border-bottom:1px solid var(--border);
+}
+.panel-header h2{font-family:var(--head);font-size:1.4rem;font-weight:700;letter-spacing:.04em;color:var(--text)}
+.panel-header .ph-sub{font-size:.75rem;color:var(--text3);font-family:var(--mono)}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:4px;margin-bottom:1rem}
+.card-head{
+  padding:.7rem 1rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--head);font-size:.8rem;font-weight:600;letter-spacing:.06em;
+  color:var(--text2);text-transform:uppercase;
+}
+.card-body{padding:1rem}
+
+/* ── REPORTS ── */
+.report-item{
+  display:flex;align-items:flex-start;gap:.75rem;
+  padding:.8rem 0;border-bottom:1px solid var(--border);
+}
+.report-item:last-child{border-bottom:none}
+.sev-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:.35rem}
+.sev-critical{background:#e05252}
+.sev-high    {background:#d4902a}
+.sev-medium  {background:#4a9ebb}
+.sev-low     {background:var(--green2)}
+.report-title{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:.25rem}
+.report-meta{font-size:.72rem;color:var(--text3);font-family:var(--mono);display:flex;gap:.75rem;flex-wrap:wrap}
+.status-badge{
+  display:inline-block;font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;
+  padding:.1em .5em;border-radius:2px;font-weight:700;
+}
+.status-active      {background:rgba(224,82,82,.15);color:var(--red)}
+.status-investigating{background:rgba(212,144,42,.15);color:var(--amber)}
+.status-monitoring  {background:rgba(74,158,187,.15);color:var(--blue)}
+.status-resolved    {background:rgba(65,196,110,.15);color:var(--green)}
+.report-actions{margin-left:auto;flex-shrink:0}
+.btn-sm{padding:.25rem .6rem;font-size:.72rem}
+
+/* ── FORM ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.form-row.full{grid-template-columns:1fr}
+.form-row .field{margin-bottom:0}
+select{
+  width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:3px;
+  padding:.5rem .75rem;color:var(--text);font-family:var(--body);font-size:.85rem;outline:none;
+  transition:border-color .15s;
+}
+select:focus{border-color:var(--green2)}
+textarea{
+  width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:3px;
+  padding:.55rem .75rem;color:var(--text);font-family:var(--mono);font-size:.82rem;
+  outline:none;resize:vertical;transition:border-color .15s;line-height:1.5;
+}
+textarea:focus{border-color:var(--green2)}
+
+/* ── PROFILE ── */
+.profile-card{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
+.profile-avatar{font-size:2.5rem}
+.profile-name{font-family:var(--head);font-size:1.2rem;font-weight:700}
+.profile-role{font-size:.75rem;color:var(--text3)}
+.perm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem}
+.perm-item{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.5rem .75rem;background:var(--s2);border-radius:3px;border:1px solid var(--border);
+  font-size:.78rem;font-family:var(--mono);
+}
+.perm-item .pi-key{color:var(--text3);flex:1}
+.pi-true {color:var(--green);font-weight:700}
+.pi-false{color:var(--text3)}
+.payload-row{display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap}
+
+/* ── ADMIN ── */
+.user-row{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.75rem 0;border-bottom:1px solid var(--border);
+}
+.user-row:last-child{border-bottom:none}
+.user-avatar{font-size:1.4rem}
+.user-name{font-size:.88rem;font-weight:700;color:var(--text)}
+.user-uname{font-size:.72rem;color:var(--text3);font-family:var(--mono)}
+.user-perms{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.admin-warning{
+  display:none;align-items:center;gap:.75rem;
+  padding:.75rem 1rem;margin-bottom:1rem;
+  background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.3);border-radius:4px;
+  font-size:.8rem;color:var(--red);
+}
+
+/* ── SECURITY LAB ── */
+.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:900px){.lab-grid{grid-template-columns:1fr}}
+.code-block{
+  background:#060d07;border:1px solid var(--border);border-radius:4px;overflow:hidden;
+}
+.code-head{
+  display:flex;align-items:center;gap:.4rem;
+  padding:.45rem .75rem;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);
+  font-family:var(--mono);font-size:.68rem;color:var(--text3);
+}
+.dot{width:9px;height:9px;border-radius:50%}
+.dot-r{background:#e05252}.dot-y{background:#d4902a}.dot-g{background:#41c46e}
+pre{font-family:var(--mono);font-size:.78rem;line-height:1.7;padding:1rem;overflow-x:auto;color:#8a9e8c;white-space:pre}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.cmt{color:#3a5a3e;font-style:italic}
+.bad{color:var(--red);font-weight:600}.good{color:var(--green)}
+
+.proto-monitor{
+  padding:.75rem 1rem;background:#060d07;border:1px solid var(--border);border-radius:4px;
+  font-family:var(--mono);font-size:.78rem;min-height:60px;
+  display:flex;align-items:center;flex-wrap:wrap;gap:.4rem;
+}
+.proto-key{padding:.15em .5em;background:var(--red-dim);color:var(--red);border-radius:2px;font-size:.75rem;border:1px solid rgba(224,82,82,.3)}
+.proto-clean{color:var(--green);font-size:.8rem}
+.step-list{counter-reset:step}
+.step{
+  display:flex;gap:.75rem;align-items:flex-start;
+  padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.82rem;
+}
+.step:last-child{border-bottom:none}
+.step-num{
+  width:20px;height:20px;border-radius:50%;background:var(--green-dim);
+  color:var(--green);font-size:.7rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.1rem;
+}
+.step-text{color:var(--text2);line-height:1.5}
+.step-text code{font-family:var(--mono);background:rgba(65,196,110,.1);color:var(--green);padding:.1em .35em;border-radius:2px;font-size:.85em}
+.result-box{
+  margin-top:1rem;padding:.75rem 1rem;
+  background:#060d07;border:1px solid var(--border);border-radius:4px;
+  font-family:var(--mono);font-size:.78rem;line-height:1.7;min-height:80px;
+  color:var(--text2);white-space:pre-wrap;word-break:break-word;
+  transition:border-color .3s;
+}
+.result-box.attacked{border-color:var(--red);background:rgba(224,82,82,.04)}
+.result-box.blocked {border-color:var(--green);background:rgba(65,196,110,.04)}
+.rb-key  {color:#82aaff}
+.rb-val  {color:var(--green)}
+.rb-bad  {color:var(--red);font-weight:600}
+.rb-good {color:var(--green);font-weight:600}
+.rb-dim  {color:var(--text3)}
+
+/* flow diagram */
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin:.75rem 0}
+.fbox{
+  background:var(--s2);border:1px solid var(--border);border-radius:3px;
+  padding:.5rem .75rem;font-family:var(--mono);font-size:.72rem;text-align:center;
+}
+.fbox .fl{color:var(--text3);font-size:.6rem;margin-bottom:.2rem}
+.fbox .fv{color:var(--text)}
+.fbox.fhigh{border-color:rgba(224,82,82,.5);background:rgba(224,82,82,.06)}
+.fbox.fhigh .fv{color:var(--red)}
+.farr{color:var(--red);padding:0 .4rem;font-size:1rem}
+
+/* toast */
+.toast{
+  position:fixed;bottom:1.5rem;right:1.5rem;
+  padding:.6rem 1rem;background:var(--s2);border:1px solid var(--border);
+  border-radius:4px;font-size:.8rem;z-index:999;
+  animation:toastIn .25s ease;box-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+.toast.t-green{border-color:rgba(65,196,110,.4);color:var(--green)}
+.toast.t-red  {border-color:rgba(224,82,82,.4);color:var(--red)}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* misc */
+.divider{border:none;border-top:1px solid var(--border);margin:.75rem 0}
+.empty{padding:2rem;text-align:center;color:var(--text3);font-size:.8rem}
+.spinner{display:inline-block;width:10px;height:10px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .5s linear infinite;vertical-align:middle;margin-right:.3rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.mt-1{margin-top:.5rem}.mt-2{margin-top:1rem}.flex-gap{display:flex;gap:.5rem;flex-wrap:wrap}
+
+.access-denied{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:3rem;text-align:center;color:var(--text3);gap:.75rem;
+}
+.access-denied .ad-icon{font-size:3rem}
+.access-denied h3{font-family:var(--head);font-size:1.1rem;color:var(--text2)}
+.access-denied p{font-size:.8rem;max-width:360px;line-height:1.6}
+.access-denied code{font-family:var(--mono);background:rgba(65,196,110,.1);color:var(--green);padding:.1em .4em;border-radius:2px;font-size:.85em}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ LOGIN ════════════════════════════════════════════ -->
+<div id="view-login">
+  <div class="login-box">
+    <div class="login-brand">
+      <span class="eco-icon">🌍</span>
+      <h1>ECOWATCH</h1>
+      <p>Pollution Response Network</p>
+    </div>
+    <div class="field">
+      <label>Username</label>
+      <input id="l-user" type="text" placeholder="enter username" autocomplete="off"/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="l-pass" type="password" placeholder="enter password"/>
+    </div>
+    <div id="login-error"></div>
+    <button class="btn btn-primary btn-full mt-2" onclick="login()">Sign In → Field Operations</button>
+    <div class="login-hint mt-2">
+      <p>
+        <strong>admin</strong> / ecowatch2026 — Administrator<br>
+        <strong>ranger</strong> / fieldwork!1 — Field Agent<br>
+        <strong>volunteer</strong> / saveearth — Volunteer
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════════════════════ -->
+<div id="view-dashboard">
+  <!-- topbar -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <span class="eco">🌍</span>
+      <h1>ECOWATCH</h1>
+      <span>Pollution Response Network</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <span id="tb-avatar"></span>
+        <span class="uname" id="tb-name"></span>
+        <span class="role-pill" id="tb-role-pill"></span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- pollution banner -->
+  <div id="proto-banner">
+    <span class="banner-icon">⚡</span>
+    <span><strong>PROTOTYPE POLLUTED</strong> — Object.prototype has been tampered with. Effective permissions may not reflect assigned roles. Keys: <span id="banner-keys"></span></span>
+    <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="resetPrototype()">Reset Prototype</button>
+  </div>
+
+  <div class="workspace">
+    <!-- sidebar -->
+    <aside class="sidebar">
+      <div class="nav-section">Operations</div>
+      <div class="nav-item active" onclick="showTab('reports')" id="nav-reports">
+        <span class="nav-icon">📋</span>Reports
+      </div>
+      <div class="nav-item" onclick="showTab('profile')" id="nav-profile">
+        <span class="nav-icon">👤</span>Profile
+      </div>
+      <div class="nav-section" style="margin-top:.5rem">Administration</div>
+      <div class="nav-item locked" id="nav-admin" onclick="tryAdmin()">
+        <span class="nav-icon">🔐</span>Admin
+        <span class="lock-icon" id="admin-lock">🔒</span>
+      </div>
+      <div class="nav-section" style="margin-top:.5rem">Research</div>
+      <div class="nav-item" onclick="showTab('lab')" id="nav-lab">
+        <span class="nav-icon">🧪</span>Security Lab
+      </div>
+    </aside>
+
+    <!-- main content -->
+    <main class="content">
+
+      <!-- ── REPORTS TAB ── -->
+      <div class="tab-panel active" id="tab-reports">
+        <div class="panel-header">
+          <h2>Pollution Reports</h2>
+          <span class="ph-sub" id="reports-count"></span>
+        </div>
+
+        <!-- submit report (hidden for volunteer) -->
+        <div class="card" id="new-report-card" style="display:none">
+          <div class="card-head">
+            <span>📝 Submit New Report</span>
+            <button class="btn btn-ghost btn-sm" onclick="toggleNewReport()">+ New</button>
+          </div>
+          <div class="card-body" id="new-report-form" style="display:none">
+            <div class="form-row">
+              <div class="field"><label>Incident Title</label><input id="r-title" type="text" placeholder="Brief description…"/></div>
+              <div class="field"><label>Location</label><input id="r-location" type="text" placeholder="Site or coordinates…"/></div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label>Severity</label>
+                <select id="r-severity">
+                  <option value="low">Low</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+              <div class="field"><label>Description (optional)</label><input id="r-desc" type="text" placeholder="Additional details…"/></div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="submitReport()">Submit Report</button>
+          </div>
+        </div>
+
+        <!-- report list -->
+        <div class="card">
+          <div class="card-head"><span>Active &amp; Recent Incidents</span></div>
+          <div class="card-body" id="reports-list"><div class="empty"><span class="spinner"></span> Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ── PROFILE TAB ── -->
+      <div class="tab-panel" id="tab-profile">
+        <div class="panel-header">
+          <h2>My Profile</h2>
+          <span class="ph-sub">Update your bio · Demo the prototype pollution exploit</span>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="profile-card">
+              <div class="profile-avatar" id="p-avatar"></div>
+              <div>
+                <div class="profile-name" id="p-name"></div>
+                <div class="profile-role">@<span id="p-username"></span> · <span id="p-role-text"></span></div>
+              </div>
+            </div>
+            <hr class="divider">
+            <h3 style="font-family:var(--head);font-size:.8rem;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:.75rem">Current Permissions</h3>
+            <div class="perm-grid" id="perm-grid"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">Profile Update — Exploit Testbed</div>
+          <div class="card-body">
+            <p style="font-size:.8rem;color:var(--text3);margin-bottom:.75rem;line-height:1.6">
+              The profile update endpoint merges your JSON payload directly into the user object.
+              Send a normal update below — or inject <code style="font-family:var(--mono);background:rgba(224,82,82,.1);color:var(--red);padding:.1em .35em;border-radius:2px">__proto__</code> to pollute <code style="font-family:var(--mono);background:rgba(224,82,82,.1);color:var(--red);padding:.1em .35em;border-radius:2px">Object.prototype</code> and escalate your permissions.
+            </p>
+            <div class="field">
+              <label>JSON Payload</label>
+              <textarea id="profile-payload" rows="4">{"bio": "I care deeply about clean water and air."}</textarea>
+            </div>
+            <div class="flex-gap mt-1">
+              <button class="btn btn-ghost btn-sm" onclick="setProfilePreset('normal')">Normal update</button>
+              <button class="btn btn-ghost btn-sm" onclick="setProfilePreset('escalate')">⚡ Inject admin privs</button>
+              <button class="btn btn-ghost btn-sm" onclick="setProfilePreset('create')">⚡ Inject create rights</button>
+            </div>
+            <div class="flex-gap mt-2">
+              <button class="btn btn-danger" onclick="updateProfile(false)">▶ Send via VULNERABLE merge</button>
+              <button class="btn btn-safe"   onclick="updateProfile(true)">▶ Send via SAFE merge</button>
+            </div>
+            <div class="result-box mt-2" id="profile-result">// result will appear here…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADMIN TAB ── -->
+      <div class="tab-panel" id="tab-admin">
+        <div class="panel-header">
+          <h2>Admin Panel</h2>
+          <span class="ph-sub">User management &amp; role assignment</span>
+        </div>
+
+        <!-- shown when accessed legitimately (or via exploit) -->
+        <div id="admin-content" style="display:none">
+          <div class="admin-warning" id="admin-exploit-warning">
+            <span style="font-size:1rem">⚡</span>
+            <span><strong>Prototype Pollution Active</strong> — You accessed this panel because <code style="font-family:var(--mono)">Object.prototype.canManageUsers</code> was injected. The server accepted your request despite your <code style="font-family:var(--mono)">volunteer</code> role because the permission lookup walks the prototype chain.</span>
+          </div>
+          <div class="card">
+            <div class="card-head"><span>All Users</span><button class="btn btn-ghost btn-sm" onclick="loadAdminUsers()">↻ Refresh</button></div>
+            <div class="card-body" id="admin-users-list"><div class="empty"><span class="spinner"></span> Loading…</div></div>
+          </div>
+        </div>
+
+        <!-- shown when access is legitimately denied -->
+        <div id="admin-denied" class="access-denied">
+          <div class="ad-icon">🔒</div>
+          <h3>Access Restricted</h3>
+          <p>This panel requires the <strong>admin</strong> role. Log in as <code>admin</code> to access it — or use the Security Lab to exploit prototype pollution and escalate your privileges.</p>
+        </div>
+      </div>
+
+      <!-- ── SECURITY LAB TAB ── -->
+      <div class="tab-panel" id="tab-lab">
+        <div class="panel-header">
+          <h2>Security Lab</h2>
+          <span class="ph-sub">CWE-1321 · Prototype Pollution · Live Demo</span>
+        </div>
+
+        <!-- attack flow diagram -->
+        <div class="card">
+          <div class="card-head">Attack Flow</div>
+          <div class="card-body">
+            <div class="flow">
+              <div class="fbox"><div class="fl">Attacker sends</div><div class="fv">{"__proto__":{"canManageUsers":true}}</div></div>
+              <div class="farr">→</div>
+              <div class="fbox"><div class="fl">vulnerableMerge runs</div><div class="fv">target["__proto__"]["canManageUsers"]=true</div></div>
+              <div class="farr">→</div>
+              <div class="fbox fhigh"><div class="fl">Object.prototype mutated</div><div class="fv">Object.prototype.canManageUsers=true</div></div>
+              <div class="farr">→</div>
+              <div class="fbox fhigh"><div class="fl">Fresh {} permission object</div><div class="fv">{}.canManageUsers === true 🚨</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lab-grid">
+          <!-- code comparison -->
+          <div>
+            <div class="code-block">
+              <div class="code-head"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span style="margin-left:.4rem">vulnerable vs safe merge</span></div>
+<pre><span class="cmt">// ❌ VULNERABLE — for…in walks __proto__</span>
+<span class="kw">function</span> <span class="fn">vulnerableMerge</span>(target, source) {
+  <span class="kw">for</span> (<span class="kw">const</span> key <span class="kw">in</span> source) {
+    <span class="kw">if</span> (<span class="kw">typeof</span> source[key] === <span class="str">'object'</span>) {
+      <span class="kw">if</span> (!target[key]) target[key] = {};
+      <span class="fn">vulnerableMerge</span>(target[key], source[key]);
+      <span class="bad">// ↑ recurses into __proto__ !</span>
+    } <span class="kw">else</span> { target[key] = source[key]; }
+  }
+}
+
+<span class="cmt">// ✅ SAFE — block dangerous keys</span>
+<span class="kw">const</span> BLOCKED = <span class="kw">new</span> Set([
+  <span class="str">'__proto__'</span>, <span class="str">'constructor'</span>, <span class="str">'prototype'</span>
+]);
+<span class="kw">function</span> <span class="fn">safeMerge</span>(target, source) {
+  <span class="kw">for</span> (<span class="kw">const</span> key <span class="kw">of</span> Object.<span class="fn">keys</span>(source)) {
+    <span class="good">if (BLOCKED.has(key)) continue; // ✓</span>
+    <span class="cmt">/* … safe recursion … */</span>
+  }
+}</pre>
+            </div>
+
+            <div class="card mt-2">
+              <div class="card-head">Why it works on this server</div>
+              <div class="card-body">
+                <div class="step">
+                  <div class="step-num">1</div>
+                  <div class="step-text">Permissions for each role are built into a <strong>fresh <code>{}</code> object</strong> per request — inheriting from <code>Object.prototype</code>.</div>
+                </div>
+                <div class="step">
+                  <div class="step-num">2</div>
+                  <div class="step-text">The <code>volunteer</code> role's table contains only <code>canView</code> and <code>canCreate</code> — <code>canManageUsers</code> is absent, so it's never set as an <em>own property</em>.</div>
+                </div>
+                <div class="step">
+                  <div class="step-num">3</div>
+                  <div class="step-text">When the code checks <code>perms.canManageUsers</code>, JavaScript walks up the prototype chain and finds the injected value on <code>Object.prototype</code>.</div>
+                </div>
+                <div class="step">
+                  <div class="step-num">4</div>
+                  <div class="step-text">The server returns <code>canManageUsers: true</code> in the permissions payload, the Admin tab unlocks, and the server accepts admin API calls.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- live exploit console -->
+          <div>
+            <div class="card">
+              <div class="card-head">
+                <span>Live Prototype Monitor</span>
+                <button class="btn btn-ghost btn-sm" onclick="loadPrototypeState()">↻ Refresh</button>
+              </div>
+              <div class="card-body">
+                <div class="proto-monitor" id="proto-monitor"><span class="proto-clean">✓ Object.prototype is clean</span></div>
+                <div class="flex-gap mt-2">
+                  <button class="btn btn-danger btn-sm" onclick="labAttack()">⚡ Launch Exploit</button>
+                  <button class="btn btn-safe btn-sm"   onclick="labAttackSafe()">✓ Try Safe Version</button>
+                  <button class="btn btn-ghost btn-sm"  onclick="resetPrototype()">↺ Reset Prototype</button>
+                </div>
+                <div class="result-box mt-2" id="lab-result">// Attack output will appear here…</div>
+              </div>
+            </div>
+
+            <div class="card mt-1">
+              <div class="card-head">Attack Payload</div>
+              <div class="card-body">
+                <div class="field">
+                  <label>Payload (editable)</label>
+                  <textarea id="lab-payload" rows="3">{"bio": "Saving the planet", "__proto__": {"canManageUsers": true, "canDeleteReports": true}}</textarea>
+                </div>
+                <div class="flex-gap mt-1">
+                  <button class="btn btn-ghost btn-sm" onclick="setLabPreset('admin')">Escalate to admin</button>
+                  <button class="btn btn-ghost btn-sm" onclick="setLabPreset('create')">Gain create rights</button>
+                  <button class="btn btn-ghost btn-sm" onclick="setLabPreset('clean')">Benign payload</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════ JAVASCRIPT ══════════════════════════════════════ -->
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let S = { token: null, user: null, perms: {}, tab: 'reports', protoPolluted: false };
+
+// ── API helper ────────────────────────────────────────────────────────────────
+async function api(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+  };
+  if (S.token) opts.headers['Authorization'] = 'Bearer ' + S.token;
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res = await fetch(path, opts);
+  const data = await res.json();
+  data._status = res.status;
+  return data;
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(msg, type = 'green') {
+  const t = document.createElement('div');
+  t.className = `toast t-${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+async function login() {
+  const u = document.getElementById('l-user').value.trim();
+  const p = document.getElementById('l-pass').value;
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+  if (!u || !p) { err.textContent = 'Username and password required.'; err.style.display = 'block'; return; }
+  try {
+    const d = await api('POST', '/api/login', { username: u, password: p });
+    if (d._status !== 200) { err.textContent = d.error || 'Login failed.'; err.style.display = 'block'; return; }
+    S.token = d.token; S.user = d.user; S.perms = d.permissions;
+    showDashboard();
+  } catch(e) { err.textContent = 'Network error.'; err.style.display = 'block'; }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('view-login').style.display !== 'none') login();
+});
+
+async function logout() {
+  if (S.token) await api('POST', '/api/logout').catch(()=>{});
+  S = { token: null, user: null, perms: {}, tab: 'reports', protoPolluted: false };
+  document.getElementById('view-dashboard').style.display = 'none';
+  document.getElementById('view-login').style.display    = 'flex';
+  document.getElementById('l-user').value = '';
+  document.getElementById('l-pass').value = '';
+}
+
+// ── Dashboard init ────────────────────────────────────────────────────────────
+function showDashboard() {
+  document.getElementById('view-login').style.display     = 'none';
+  document.getElementById('view-dashboard').style.display = 'flex';
+  document.getElementById('view-dashboard').style.flexDirection = 'column';
+  renderTopbar();
+  applyPermissions();
+  showTab('reports');
+  loadReports();
+  startProtoMonitor();
+}
+
+function renderTopbar() {
+  document.getElementById('tb-avatar').textContent  = S.user.avatar;
+  document.getElementById('tb-name').textContent    = S.user.name;
+  const pill = document.getElementById('tb-role-pill');
+  pill.textContent  = S.user.role.replace('_', ' ');
+  pill.className    = 'role-pill role-' + S.user.role;
+}
+
+function applyPermissions() {
+  // Profile tab
+  document.getElementById('p-avatar').textContent   = S.user.avatar;
+  document.getElementById('p-name').textContent     = S.user.name;
+  document.getElementById('p-username').textContent = S.user.username;
+  document.getElementById('p-role-text').textContent = S.user.role.replace('_',' ');
+  renderPermGrid(S.perms);
+
+  // Reports — show submit card if canCreate
+  document.getElementById('new-report-card').style.display = S.perms.canCreate ? 'block' : 'none';
+
+  // Admin nav
+  updateAdminNav();
+}
+
+function updateAdminNav() {
+  const nav  = document.getElementById('nav-admin');
+  const lock = document.getElementById('admin-lock');
+  if (S.perms.canManageUsers) {
+    nav.classList.remove('locked');
+    if (S.protoPolluted) {
+      nav.classList.add('exploited');
+      lock.textContent = '⚡';
+    } else {
+      nav.classList.remove('exploited');
+      lock.textContent = '';
+    }
+    nav.onclick = () => showTab('admin');
+  } else {
+    nav.classList.add('locked');
+    nav.classList.remove('exploited');
+    lock.textContent = '🔒';
+    nav.onclick = tryAdmin;
+  }
+}
+
+function tryAdmin() {
+  if (!S.perms.canManageUsers) toast('Access denied — admin only', 'red');
+}
+
+function renderPermGrid(perms) {
+  const keys = ['canView','canCreate','canManageUsers','canDeleteReports'];
+  document.getElementById('perm-grid').innerHTML = keys.map(k =>
+    `<div class="perm-item">
+      <span class="pi-key">${k}</span>
+      <span class="${perms[k] ? 'pi-true' : 'pi-false'}">${perms[k] ? '✓ true' : '✗ false'}</span>
+    </div>`
+  ).join('');
+}
+
+// ── Tab navigation ────────────────────────────────────────────────────────────
+function showTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab)?.classList.add('active');
+  S.tab = tab;
+  if (tab === 'admin') loadAdminUsers();
+  if (tab === 'lab')   loadPrototypeState();
+}
+
+// ── Reports ───────────────────────────────────────────────────────────────────
+async function loadReports() {
+  const list = document.getElementById('reports-list');
+  list.innerHTML = '<div class="empty"><span class="spinner"></span> Loading…</div>';
+  const d = await api('GET', '/api/reports');
+  if (d._status !== 200) { list.innerHTML = `<div class="empty">${d.error}</div>`; return; }
+  document.getElementById('reports-count').textContent = `${d.reports.length} incidents on record`;
+  if (!d.reports.length) { list.innerHTML = '<div class="empty">No reports found.</div>'; return; }
+  list.innerHTML = d.reports.map(r => `
+    <div class="report-item">
+      <div class="sev-dot sev-${r.severity}"></div>
+      <div style="flex:1">
+        <div class="report-title">${esc(r.title)}</div>
+        <div class="report-meta">
+          <span>📍 ${esc(r.location)}</span>
+          <span>👤 ${esc(r.reporter)}</span>
+          <span>📅 ${r.date}</span>
+          <span class="status-badge status-${r.status}">${r.status}</span>
+          <span class="status-badge" style="background:rgba(255,255,255,.05);color:var(--text3)">${r.severity}</span>
+        </div>
+        ${r.description ? `<div style="font-size:.75rem;color:var(--text3);margin-top:.25rem">${esc(r.description)}</div>` : ''}
+      </div>
+      ${S.perms.canDeleteReports
+        ? `<div class="report-actions"><button class="btn btn-ghost btn-sm" onclick="deleteReport(${r.id})">🗑 Delete</button></div>`
+        : ''}
+    </div>
+  `).join('');
+}
+
+async function deleteReport(id) {
+  const d = await api('DELETE', '/api/reports/' + id);
+  if (d._status === 200) { toast('Report deleted', 'green'); loadReports(); }
+  else toast(d.error || 'Delete failed', 'red');
+}
+
+let newReportOpen = false;
+function toggleNewReport() {
+  newReportOpen = !newReportOpen;
+  document.getElementById('new-report-form').style.display = newReportOpen ? 'block' : 'none';
+}
+
+async function submitReport() {
+  const d = await api('POST', '/api/reports', {
+    title:       document.getElementById('r-title').value,
+    location:    document.getElementById('r-location').value,
+    severity:    document.getElementById('r-severity').value,
+    description: document.getElementById('r-desc').value,
+  });
+  if (d._status === 200) {
+    toast('Report submitted', 'green');
+    document.getElementById('r-title').value = '';
+    document.getElementById('r-location').value = '';
+    document.getElementById('r-desc').value = '';
+    newReportOpen = false;
+    document.getElementById('new-report-form').style.display = 'none';
+    loadReports();
+  } else {
+    toast(d.error || 'Submission failed', 'red');
+  }
+}
+
+// ── Profile update ────────────────────────────────────────────────────────────
+const PROFILE_PRESETS = {
+  normal:    '{"bio": "I care deeply about clean water and air."}',
+  escalate:  '{"bio": "Saving the planet", "__proto__": {"canManageUsers": true, "canDeleteReports": true}}',
+  create:    '{"bio": "Want to file my own reports", "__proto__": {"canCreate": true}}',
+};
+
+function setProfilePreset(key) {
+  document.getElementById('profile-payload').value = PROFILE_PRESETS[key];
+}
+
+async function updateProfile(safe) {
+  const box = document.getElementById('profile-result');
+  box.className = 'result-box mt-2';
+  box.textContent = 'Running…';
+  const payload = document.getElementById('profile-payload').value;
+  const endpoint = safe ? '/api/profile/update-safe' : '/api/profile/update';
+  const d = await api('POST', endpoint, { data: payload });
+
+  if (d._status !== 200) {
+    box.textContent = '// Error: ' + (d.error || 'Request failed');
+    return;
+  }
+
+  // Update state
+  S.user  = d.user;
+  S.perms = d.permissions;
+  renderTopbar();
+  applyPermissions();
+
+  const atk = d.attack;
+  const polluted = atk.pollutedKeys && atk.pollutedKeys.length > 0;
+
+  box.className = 'result-box mt-2 ' + (polluted ? 'attacked' : 'blocked');
+
+  let html = '';
+  if (polluted) {
+    html += `<span class="rb-bad">⚡ PROTOTYPE POLLUTED\n\n</span>`;
+    html += `<span class="rb-dim">── Injected onto Object.prototype ──\n</span>`;
+    atk.pollutedKeys.forEach(k => {
+      html += `<span class="rb-bad">  Object.prototype["${esc(k)}"] = ${JSON.stringify(atk.prototypeState[k])}\n</span>`;
+    });
+    html += `\n<span class="rb-dim">── Your effective permissions now ──\n</span>`;
+    Object.entries(d.permissions).forEach(([k,v]) => {
+      html += `  <span class="rb-key">${k}</span>: <span class="${v ? 'rb-bad' : 'rb-dim'}">${v}</span>\n`;
+    });
+    if (atk.privilegeEscalation) {
+      html += `\n<span class="rb-bad">🚨 PRIVILEGE ESCALATION DETECTED\n`;
+      html += `   Admin panel is now accessible via exploited permissions.</span>`;
+    }
+  } else {
+    html += `<span class="rb-good">✅ ${safe ? 'SAFE MERGE — __proto__ key was blocked and dropped.' : 'No prototype keys were injected.'}\n\n</span>`;
+    html += `<span class="rb-dim">── Your permissions ──\n</span>`;
+    Object.entries(d.permissions).forEach(([k,v]) => {
+      html += `  <span class="rb-key">${k}</span>: <span class="${v ? 'rb-good' : 'rb-dim'}">${v}</span>\n`;
+    });
+  }
+
+  box.innerHTML = html;
+
+  // Update banner and monitor
+  await refreshProtoBanner();
+  if (S.tab === 'lab') loadPrototypeState();
+}
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+async function loadAdminUsers() {
+  const content = document.getElementById('admin-content');
+  const denied  = document.getElementById('admin-denied');
+  const list    = document.getElementById('admin-users-list');
+  const warning = document.getElementById('admin-exploit-warning');
+
+  if (!S.perms.canManageUsers) {
+    content.style.display = 'none';
+    denied.style.display  = 'flex';
+    return;
+  }
+
+  content.style.display = 'block';
+  denied.style.display  = 'none';
+  warning.style.display = S.protoPolluted ? 'flex' : 'none';
+  list.innerHTML = '<div class="empty"><span class="spinner"></span> Loading…</div>';
+
+  const d = await api('GET', '/api/admin/users');
+  if (d._status !== 200) {
+    list.innerHTML = `<div class="empty" style="color:var(--red)">${d.error}</div>`;
+    return;
+  }
+
+  list.innerHTML = d.users.map(u => `
+    <div class="user-row">
+      <div class="user-avatar">${u.avatar}</div>
+      <div>
+        <div class="user-name">${esc(u.name)}</div>
+        <div class="user-uname">@${esc(u.username)} · ${u.bio ? esc(u.bio.slice(0,50)) : ''}</div>
+      </div>
+      <div class="user-perms">
+        <span class="role-pill role-${u.role}">${u.role.replace('_',' ')}</span>
+        <select onchange="assignRole('${esc(u.username)}', this.value)" style="width:130px">
+          <option value="volunteer"   ${u.role==='volunteer'   ? 'selected':''}>volunteer</option>
+          <option value="field_agent" ${u.role==='field_agent' ? 'selected':''}>field_agent</option>
+          <option value="admin"       ${u.role==='admin'       ? 'selected':''}>admin</option>
+        </select>
+      </div>
+    </div>
+  `).join('');
+
+  if (d.prototypeWarning) toast(d.prototypeWarning, 'red');
+}
+
+async function assignRole(username, role) {
+  const d = await api('POST', '/api/admin/assign-role', { username, role });
+  if (d._status === 200) {
+    toast(d.message, 'green');
+    if (username === S.user.username) {
+      S.user = d.user;
+      renderTopbar();
+    }
+    loadAdminUsers();
+  } else {
+    toast(d.error || 'Role assignment failed', 'red');
+  }
+}
+
+// ── Security Lab ──────────────────────────────────────────────────────────────
+const LAB_PRESETS = {
+  admin:  '{"bio": "Saving the planet", "__proto__": {"canManageUsers": true, "canDeleteReports": true}}',
+  create: '{"bio": "Want to file reports", "__proto__": {"canCreate": true}}',
+  clean:  '{"bio": "Just a regular update, nothing suspicious here."}',
+};
+
+function setLabPreset(k) {
+  document.getElementById('lab-payload').value = LAB_PRESETS[k];
+}
+
+async function labAttack() {
+  const payload = document.getElementById('lab-payload').value;
+  document.getElementById('profile-payload').value = payload;
+  await updateProfile(false);
+  if (S.tab !== 'profile') {
+    // trigger from lab — just re-run and show in lab result
+  }
+  const profileResult = document.getElementById('profile-result').innerHTML;
+  document.getElementById('lab-result').className = document.getElementById('profile-result').className.replace('mt-2','');
+  document.getElementById('lab-result').innerHTML = profileResult;
+  await loadPrototypeState();
+}
+
+async function labAttackSafe() {
+  const payload = document.getElementById('lab-payload').value;
+  document.getElementById('profile-payload').value = payload;
+  await updateProfile(true);
+  const profileResult = document.getElementById('profile-result').innerHTML;
+  document.getElementById('lab-result').className = document.getElementById('profile-result').className.replace('mt-2','');
+  document.getElementById('lab-result').innerHTML = profileResult;
+  await loadPrototypeState();
+}
+
+async function loadPrototypeState() {
+  const monitor = document.getElementById('proto-monitor');
+  const d = await api('GET', '/api/prototype-state');
+  if (d.polluted && d.keys.length) {
+    monitor.innerHTML = d.keys.map(k =>
+      `<span class="proto-key">${esc(k)}: ${JSON.stringify(d.state[k])}</span>`
+    ).join('');
+  } else {
+    monitor.innerHTML = '<span class="proto-clean">✓ Object.prototype is clean</span>';
+  }
+}
+
+async function resetPrototype() {
+  const d = await api('POST', '/api/prototype-reset');
+  S.protoPolluted = false;
+
+  // refresh me to get true permissions
+  const me = await api('GET', '/api/me');
+  if (me._status === 200) { S.user = me.user; S.perms = me.permissions; }
+
+  renderTopbar();
+  applyPermissions();
+  await refreshProtoBanner();
+  if (S.tab === 'lab') loadPrototypeState();
+  if (S.tab === 'admin') loadAdminUsers();
+  renderPermGrid(S.perms);
+  toast(`Prototype reset — ${d.cleared.length > 0 ? d.cleared.join(', ') + ' removed' : 'already clean'}`, 'green');
+}
+
+// ── Prototype banner & monitor ─────────────────────────────────────────────────
+async function refreshProtoBanner() {
+  const d = await api('GET', '/api/prototype-state');
+  const banner = document.getElementById('proto-banner');
+  S.protoPolluted = d.polluted;
+  if (d.polluted && d.keys.length) {
+    document.getElementById('banner-keys').textContent = d.keys.join(', ');
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+  updateAdminNav();
+}
+
+let protoInterval = null;
+function startProtoMonitor() {
+  if (protoInterval) clearInterval(protoInterval);
+  protoInterval = setInterval(async () => {
+    await refreshProtoBanner();
+    if (S.tab === 'lab') loadPrototypeState();
+  }, 3000);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+document.getElementById('l-user').focus();
+</script>
+</body>
+</html>
