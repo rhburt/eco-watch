@@ -31,18 +31,6 @@ function vulnerableMerge(target, source) {
 }
 ```
 
-Sending the following payload poisons `Object.prototype` and escalates a `volunteer` account to admin:
-
-```json
-{
-  "bio": "Saving the planet",
-  "__proto__": {
-    "canManageUsers": true,
-    "canDeleteReports": true
-  }
-}
-```
-
 ---
 
 ## CVE Reference
